@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة تعلم الحروف - إصدار محسّن</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffccd5, #b5ead7, #ffdac1, #e2f0cb);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(45deg, #ff8fab, #ffb3c6);
+            border-radius: 25px;
+            color: white;
+            margin-bottom: 20px;
+            border: 5px solid #ffd166;
+            box-shadow: 0 10px 20px rgba(255, 143, 171, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 #ff6b9d;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            color: #fff9db;
+        }
+        
+        /* الشاشات */
+        .screen {
+            background-color: white;
+            padding: 30px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            display: none;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 4px solid #ff8fab;
+        }
+        
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* شاشة اختيار اللغة */
+        .language-options {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        /* شاشة اختيار الحرف */
+        .letters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        /* شاشة اختيار المرحلة */
+        .stages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        /* شاشة اللعبة */
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            background: linear-gradient(45deg, #a0e7e5, #b5ead7);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 4px solid #4db6ac;
+            box-shadow: 0 5px 15px rgba(77, 182, 172, 0.2);
+        }
+        
+        .info-box {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #2d6a4f;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            color: #ff8fab;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 0 #ffccd5;
+        }
+        
+        /* العناصر العامة */
+        .btn {
+            padding: 18px 35px;
+            font-size: 1.3rem;
+            background: linear-gradient(45deg, #ff8fab, #ff6b9d);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 6px 0 #ff4d8d;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 0 #ff4d8d;
+        }
+        
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #ff4d8d;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #a0e7e5, #4db6ac);
+            box-shadow: 0 6px 0 #2d6a4f;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 8px 0 #2d6a4f;
+        }
+        
+        .btn-back {
+            background: linear-gradient(45deg, #ffd166, #ffb300);
+            color: #333;
+            box-shadow: 0 6px 0 #ff9800;
+        }
+        
+        .btn-back:hover {
+            box-shadow: 0 8px 0 #ff9800;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #ffccd5, #ffb3c6);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 4px solid transparent;
+            box-shadow: 0 8px 15px rgba(255, 143, 171, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(255, 143, 171, 0.3);
+            border-color: #ff6b9d;
+        }
+        
+        .card:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .card:hover:before {
+            opacity: 1;
+        }
+        
+        .card.selected {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .card.completed {
+            background: linear-gradient(135deg, #a0e7e5, #4db6ac);
+            border-color: #2d6a4f;
+        }
+        
+        .letter-display {
+            font-size: 6rem;
+            text-align: center;
+            margin: 30px 0;
+            color: #ff8fab;
+            font-family: 'Comic Sans MS', 'Traditional Arabic', 'Arial', sans-serif;
+            text-shadow: 4px 4px 0 #ffccd5;
+            font-weight: 900;
+        }
+        
+        .letter-display.english {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        }
+        
+        .mission {
+            text-align: center;
+            background: linear-gradient(45deg, #e2f0cb, #b5ead7);
+            padding: 25px;
+            border-radius: 20px;
+            margin: 25px 0;
+            border: 4px dashed #a0e7e5;
+            box-shadow: 0 5px 15px rgba(162, 228, 184, 0.2);
+        }
+        
+        .mission-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2d6a4f;
+            margin-bottom: 10px;
+        }
+        
+        .mission-subtext {
+            font-size: 1.3rem;
+            color: #4db6ac;
+        }
+        
+        /* محتوى المراحل */
+        .stage-content {
+            margin: 25px 0;
+        }
+        
+        /* المرحلة 1 - البحث عن الحرف (مستويات مختلفة) */
+        .level-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .level-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .level-btn.easy {
+            background: linear-gradient(45deg, #a0e7e5, #4db6ac);
+            color: white;
+            box-shadow: 0 4px 0 #2d6a4f;
+        }
+        
+        .level-btn.medium {
+            background: linear-gradient(45deg, #ffd166, #ffb300);
+            color: #333;
+            box-shadow: 0 4px 0 #ff9800;
+        }
+        
+        .level-btn.hard {
+            background: linear-gradient(45deg, #ff8fab, #ff6b9d);
+            color: white;
+            box-shadow: 0 4px 0 #ff4d8d;
+        }
+        
+        .level-btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        .letters-game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .letter-game-card {
+            background: linear-gradient(135deg, #ffdac1, #ffb4a2);
+            border-radius: 20px;
+            padding: 35px;
+            font-size: 3.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', 'Traditional Arabic', 'Arial', sans-serif;
+            font-weight: 900;
+            border: 5px solid transparent;
+            box-shadow: 0 10px 20px rgba(255, 180, 162, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1/1;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .letter-game-card.easy {
+            background: linear-gradient(135deg, #e2f0cb, #b5ead7);
+            border-color: #a0e7e5;
+            font-size: 4rem;
+        }
+        
+        .letter-game-card.medium {
+            background: linear-gradient(135deg, #ffdac1, #ffb4a2);
+            border-color: #ff9c8e;
+            font-size: 3.5rem;
+        }
+        
+        .letter-game-card.hard {
+            background: linear-gradient(135deg, #ffccd5, #ff8fab);
+            border-color: #ff6b9d;
+            font-size: 3rem;
+        }
+        
+        .letter-game-card:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .letter-game-card.correct {
+            background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+            border-color: #4caf50;
+            color: #2e7d32;
+            animation: celebrate 0.5s ease;
+        }
+        
+        .letter-game-card.wrong {
+            background: linear-gradient(135deg, #ffcdd2, #ff8a80);
+            border-color: #f44336;
+            color: #c62828;
+            animation: shake 0.5s ease;
+        }
+        
+        .letter-game-card.english {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        }
+        
+        /* المرحلة 2 - الكتابة */
+        .drawing-area {
+            width: 100%;
+            height: 350px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 25px;
+            border: 6px solid #a0e7e5;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(160, 231, 229, 0.3);
+        }
+        
+        #drawingCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23ff8fab' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") 16 16, crosshair;
+        }
+        
+        .drawing-guide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            font-size: 12rem;
+            color: rgba(255, 143, 171, 0.15);
+            font-family: 'Comic Sans MS', 'Traditional Arabic', 'Arial', sans-serif;
+            font-weight: 900;
+        }
+        
+        /* المرحلة 3 - الكلمات (صور) */
+        .images-game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .image-card {
+            background: linear-gradient(135deg, #e2f0cb, #b5ead7);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 5px solid transparent;
+            box-shadow: 0 10px 20px rgba(162, 228, 184, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 280px;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(162, 228, 184, 0.3);
+        }
+        
+        .image-card.correct {
+            background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+            border-color: #4caf50;
+        }
+        
+        .image-card.wrong {
+            background: linear-gradient(135deg, #ffcdd2, #ff8a80);
+            border-color: #f44336;
+            animation: shake 0.5s ease;
+        }
+        
+        .image-emoji {
+            font-size: 5rem;
+            margin: 20px 0;
+        }
+        
+        .image-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2d6a4f;
+            margin-bottom: 10px;
+        }
+        
+        .image-letter {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ff8fab;
+            font-family: 'Comic Sans MS', 'Traditional Arabic', 'Arial', sans-serif;
+            text-shadow: 2px 2px 0 #ffccd5;
+        }
+        
+        .image-card.english .image-letter {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        }
+        
+        /* المرحلة 4 - الصوت */
+        .sound-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .sound-btn {
+            padding: 25px 50px;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #ff8fab, #ff6b9d);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 0 #ff4d8d;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .sound-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 0 #ff4d8d;
+        }
+        
+        .sound-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 4px 0 #ff4d8d;
+        }
+        
+        .sound-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .sound-card {
+            background: linear-gradient(135deg, #ffdac1, #ffb4a2);
+            border-radius: 20px;
+            padding: 40px;
+            font-size: 4rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 5px solid transparent;
+            font-family: 'Comic Sans MS', 'Traditional Arabic', 'Arial', sans-serif;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1/1;
+        }
+        
+        .sound-card:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .sound-card.correct {
+            background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+        
+        .sound-card.wrong {
+            background: linear-gradient(135deg, #ffcdd2, #ff8a80);
+            border-color: #f44336;
+            color: #c62828;
+            animation: shake 0.5s ease;
+        }
+        
+        /* المرحلة 5 - المراجعة الشاملة */
+        .review-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .review-card {
+            background: linear-gradient(135deg, #e2f0cb, #b5ead7);
+            border-radius: 25px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 5px solid #a0e7e5;
+            box-shadow: 0 10px 25px rgba(162, 228, 184, 0.2);
+            min-height: 250px;
+        }
+        
+        .review-question {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d6a4f;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .review-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .review-option {
+            padding: 15px 25px;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #ffdac1, #ffb4a2);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid #ff9c8e;
+            min-width: 100px;
+            text-align: center;
+            font-family: 'Comic Sans MS', 'Traditional Arabic', 'Arial', sans-serif;
+        }
+        
+        .review-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(255, 156, 142, 0.3);
+        }
+        
+        .review-option.selected {
+            background: linear-gradient(45deg, #ff8fab, #ff6b9d);
+            color: white;
+            border-color: #ff4d8d;
+            transform: scale(1.05);
+        }
+        
+        .review-option.correct {
+            background: linear-gradient(45deg, #c8e6c9, #a5d6a7);
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+        
+        .review-option.wrong {
+            background: linear-gradient(45deg, #ffcdd2, #ff8a80);
+            border-color: #f44336;
+            color: #c62828;
+        }
+        
+        /* التغذية الراجعة */
+        .feedback {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(45deg, #e2f0cb, #b5ead7);
+            border-radius: 25px;
+            margin: 30px 0;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 5px solid #a0e7e5;
+            box-shadow: 0 10px 25px rgba(162, 228, 184, 0.2);
+        }
+        
+        .feedback-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2d6a4f;
+            margin-bottom: 15px;
+        }
+        
+        .reward {
+            font-size: 4rem;
+            margin: 15px 0;
+        }
+        
+        /* التصميم المتجاوب */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .letters-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 15px;
+            }
+            
+            .stages-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .letter-game-card {
+                font-size: 2.5rem;
+                padding: 25px;
+            }
+            
+            .letter-game-card.easy { font-size: 3rem; }
+            .letter-game-card.medium { font-size: 2.5rem; }
+            .letter-game-card.hard { font-size: 2rem; }
+            
+            .sound-card {
+                font-size: 3rem;
+                padding: 30px;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .images-game-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .review-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out 3;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .bounce {
+            animation: bounce 0.5s ease-in-out 2;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .pulse {
+            animation: pulse 1s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 لعبة تعلم الحروف - موهوب 🌟</h1>
+            <p class="subtitle">تعلم الحروف بطريقة تفاعلية مليئة بالمرح والمتعة!</p>
+        </header>
+        
+        <!-- شاشة اختيار اللغة -->
+        <div id="languageScreen" class="screen active">
+            <h2 style="text-align: center; color: #ff8fab; margin-bottom: 30px; font-size: 2.2rem;">اختر اللغة</h2>
+            <div class="language-options">
+                <button class="btn" onclick="selectLanguage('arabic')">
+                    <i class="fas fa-language"></i> العربية
+                </button>
+                <button class="btn" onclick="selectLanguage('english')">
+                    <i class="fas fa-language"></i> English
+                </button>
+            </div>
+        </div>
+        
+        <!-- شاشة اختيار الحرف -->
+        <div id="letterScreen" class="screen">
+            <h2 style="text-align: center; color: #ff8fab; margin-bottom: 30px; font-size: 2.2rem;">اختر الحرف</h2>
+            <div id="lettersContainer" class="letters-grid"></div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-back" onclick="showScreen('languageScreen')">
+                    <i class="fas fa-arrow-right"></i> العودة
+                </button>
+            </div>
+        </div>
+        
+        <!-- شاشة اختيار المرحلة -->
+        <div id="stageScreen" class="screen">
+            <h2 style="text-align: center; color: #ff8fab; margin-bottom: 30px; font-size: 2.2rem;">اختر المرحلة</h2>
+            <div id="selectedLetterDisplay" class="letter-display">أ</div>
+            <div id="stagesContainer" class="stages-grid"></div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-back" onclick="showScreen('letterScreen')">
+                    <i class="fas fa-arrow-right"></i> العودة
+                </button>
+            </div>
+        </div>
+        
+        <!-- شاشة اللعبة -->
+        <div id="gameScreen" class="screen">
+            <div class="game-info">
+                <div class="info-box">
+                    <div class="info-label">المرحلة</div>
+                    <div id="currentStageDisplay" class="info-value">1</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">النتيجة</div>
+                    <div id="scoreDisplay" class="info-value">0</div>
+                </div>
+                <div class="info-box">
+                    <div id="stageNameDisplay" class="info-label">اكتشاف الحرف</div>
+                </div>
+            </div>
+            
+            <div id="stageContent" class="stage-content">
+                <!-- محتوى المرحلة سيتم تحميله هنا -->
+            </div>
+            
+            <div class="feedback" id="feedbackArea">
+                <div id="feedbackText" class="feedback-text">مرحباً! ابدأ المرحلة الأولى</div>
+                <div id="rewardIcon" class="reward">🔍</div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="provideHint()">
+                    <i class="fas fa-lightbulb"></i> مساعدة
+                </button>
+                <button class="btn btn-secondary" onclick="restartStage()">
+                    <i class="fas fa-redo"></i> إعادة المحاولة
+                </button>
+                <button class="btn" id="nextStageBtn" onclick="nextStage()" style="display: none;">
+                    <i class="fas fa-arrow-right"></i> المرحلة التالية
+                </button>
+                <button class="btn btn-back" onclick="showScreen('stageScreen')">
+                    <i class="fas fa-arrow-right"></i> العودة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ المتغيرات العامة ============
+        let selectedLanguage = '';
+        let selectedLetter = '';
+        let currentStage = 1;
+        let score = 0;
+        let gameActive = true;
+        let currentLevel = 'easy'; // مستوى الصعوبة الحالي
+        
+        // الحروف العربية (5 حروف فقط)
+        const arabicLetters = ['أ', 'ب', 'ت', 'ث', 'ج'];
+        
+        // الحروف الإنجليزية (5 حروف فقط)
+        const englishLetters = ['A', 'B', 'C', 'D', 'E'];
+        
+        // المراحل الخمس
+        const stages = [
+            { id: 1, name: "اكتشاف الحرف", icon: "🔍", description: "ابحث عن الحرف بين الحروف الأخرى" },
+            { id: 2, name: "كتابة الحرف", icon: "✏️", description: "ارسم الحرف بطريقة صحيحة" },
+            { id: 3, name: "اكتشاف الصور", icon: "🖼️", description: "اختر الصور التي تبدأ بالحرف" },
+            { id: 4, name: "صوت الحرف", icon: "🔊", description: "استمع للصوت واختر الحرف الصحيح" },
+            { id: 5, name: "مراجعة شاملة", icon: "🎯", description: "اختبار شامل لكل ما تعلمته" }
+        ];
+        
+        // أصوات الحروف العربية (نسخة محاكاة)
+        const arabicLetterSounds = {
+            'أ': 'ألف',
+            'ب': 'باء',
+            'ت': 'تاء',
+            'ث': 'ثاء',
+            'ج': 'جيم'
+        };
+        
+        // أصوات الحروف الإنجليزية (نسخة محاكاة)
+        const englishLetterSounds = {
+            'A': 'إيه',
+            'B': 'بي',
+            'C': 'سي',
+            'D': 'دي',
+            'E': 'إي'
+        };
+        
+        // الصور والعناصر المرئية لكل حرف
+        const arabicImages = {
+            'أ': [{ emoji: '🐰', name: 'أرنب' }, { emoji: '🦁', name: 'أسد' }, { emoji: '👩', name: 'أم' }],
+            'ب': [{ emoji: '🚪', name: 'باب' }, { emoji: '🏠', name: 'بيت' }, { emoji: '🌊', name: 'بحر' }],
+            'ت': [{ emoji: '🍎', name: 'تفاحة' }, { emoji: '👑', name: 'تاج' }, { emoji: '🐊', name: 'تمساح' }],
+            'ث': [{ emoji: '🦊', name: 'ثعلب' }, { emoji: '👗', name: 'ثوب' }, { emoji: '🥕', name: 'ثمرة' }],
+            'ج': [{ emoji: '🐫', name: 'جمل' }, { emoji: '🥕', name: 'جزر' }, { emoji: '🗻', name: 'جبل' }]
+        };
+        
+        const englishImages = {
+            'A': [{ emoji: '🍎', name: 'Apple' }, { emoji: '🐜', name: 'Ant' }, { emoji: '✈️', name: 'Airplane' }],
+            'B': [{ emoji: '⚽', name: 'Ball' }, { emoji: '📚', name: 'Book' }, { emoji: '🐦', name: 'Bird' }],
+            'C': [{ emoji: '🐱', name: 'Cat' }, { emoji: '🚗', name: 'Car' }, { emoji: '🎂', name: 'Cake' }],
+            'D': [{ emoji: '🐶', name: 'Dog' }, { emoji: '🚪', name: 'Door' }, { emoji: '🦆', name: 'Duck' }],
+            'E': [{ emoji: '🥚', name: 'Egg' }, { emoji: '🐘', name: 'Elephant' }, { emoji: '👂', name: 'Ear' }]
+        };
+        
+        // ============ الدوال الأساسية ============
+        
+        // تبديل بين الشاشات
+        function showScreen(screenId) {
+            // إخفاء جميع الشاشات
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // إظهار الشاشة المطلوبة
+            document.getElementById(screenId).classList.add('active');
+        }
+        
+        // اختيار اللغة
+        function selectLanguage(language) {
+            selectedLanguage = language;
+            loadLetters();
+            showScreen('letterScreen');
+        }
+        
+        // تحميل الحروف
+        function loadLetters() {
+            const container = document.getElementById('lettersContainer');
+            container.innerHTML = '';
+            
+            const letters = selectedLanguage === 'arabic' ? arabicLetters : englishLetters;
+            
+            letters.forEach(letter => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="font-size: 3.5rem; font-weight: 900; color: #ff8fab; text-shadow: 3px 3px 0 #ffccd5;">
+                        ${letter}
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        ${selectedLanguage === 'arabic' ? 'حرف عربي' : 'English letter'}
+                    </div>
+                `;
+                card.onclick = () => selectLetter(letter);
+                
+                container.appendChild(card);
+            });
+        }
+        
+        // اختيار الحرف
+        function selectLetter(letter) {
+            selectedLetter = letter;
+            
+            // تحديث عرض الحرف المختار
+            const display = document.getElementById('selectedLetterDisplay');
+            display.textContent = letter;
+            display.className = selectedLanguage === 'arabic' ? 'letter-display' : 'letter-display english';
+            
+            loadStages();
+            showScreen('stageScreen');
+        }
+        
+        // تحميل المراحل
+        function loadStages() {
+            const container = document.getElementById('stagesContainer');
+            container.innerHTML = '';
+            
+            stages.forEach(stage => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="font-size: 3rem; margin-bottom: 15px;">${stage.icon}</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; color: #333;">${stage.name}</div>
+                    <div style="font-size: 1rem; color: #666; line-height: 1.4;">${stage.description}</div>
+                `;
+                card.onclick = () => selectStage(stage.id);
+                container.appendChild(card);
+            });
+        }
+        
+        // اختيار المرحلة
+        function selectStage(stageId) {
+            currentStage = stageId;
+            startStage();
+        }
+        
+        // بدء المرحلة
+        function startStage() {
+            // تحديث العرض
+            document.getElementById('currentStageDisplay').textContent = currentStage;
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('stageNameDisplay').textContent = stages[currentStage-1].name;
+            
+            // إخفاء زر المرحلة التالية
+            document.getElementById('nextStageBtn').style.display = 'none';
+            
+            // تحميل محتوى المرحلة
+            loadStageContent();
+            
+            // إظهار شاشة اللعبة
+            showScreen('gameScreen');
+            
+            // إعادة تنشيط اللعبة
+            gameActive = true;
+            
+            // رسالة بداية
+            showFeedback(`ابدأ المرحلة ${currentStage}: ${stages[currentStage-1].name}`, stages[currentStage-1].icon);
+        }
+        
+        // ============ محتوى المراحل ============
+        
+        // تحميل محتوى المرحلة الحالية
+        function loadStageContent() {
+            const container = document.getElementById('stageContent');
+            container.innerHTML = '';
+            
+            switch(currentStage) {
+                case 1:
+                    loadStage1Content(container);
+                    break;
+                case 2:
+                    loadStage2Content(container);
+                    break;
+                case 3:
+                    loadStage3Content(container);
+                    break;
+                case 4:
+                    loadStage4Content(container);
+                    break;
+                case 5:
+                    loadStage5Content(container);
+                    break;
+            }
+        }
+        
+        // المرحلة 1: اكتشاف الحرف (بمستويات مختلفة)
+        function loadStage1Content(container) {
+            container.innerHTML = `
+                <div class="mission">
+                    <div class="mission-text">اكتشف حرف ${selectedLetter} بين الحروف التالية</div>
+                    <div class="mission-subtext">اختر مستوى الصعوبة ثم انقر على الحرف ${selectedLetter} عندما تجده</div>
+                </div>
+                <div class="level-selection">
+                    <button class="level-btn easy" onclick="setLevel('easy')">سـهــل</button>
+                    <button class="level-btn medium" onclick="setLevel('medium')">مـتـوسـط</button>
+                    <button class="level-btn hard" onclick="setLevel('hard')">صـعـب</button>
+                </div>
+                <div id="lettersGameContainer" class="letters-game-grid"></div>
+            `;
+            
+            // تعيين المستوى الافتراضي
+            setLevel('easy');
+        }
+        
+        // تعيين مستوى الصعوبة
+        function setLevel(level) {
+            currentLevel = level;
+            
+            // تحديث أزرار المستويات
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.style.transform = 'translateY(0)';
+                btn.style.opacity = '0.8';
+            });
+            
+            // تمييز المستوى المختار
+            const selectedBtn = document.querySelector(`.level-btn.${level}`);
+            selectedBtn.style.transform = 'translateY(-5px)';
+            selectedBtn.style.opacity = '1';
+            
+            // إعادة إنشاء الحروف بناءً على المستوى
+            createLetterGame(level);
+        }
+        
+        // إنشاء لعبة الحروف حسب المستوى
+        function createLetterGame(level) {
+            const gameContainer = document.getElementById('lettersGameContainer');
+            gameContainer.innerHTML = '';
+            
+            // إعدادات كل مستوى
+            const levelSettings = {
+                easy: { total: 9, target: 3, size: '4rem' },
+                medium: { total: 12, target: 3, size: '3.5rem' },
+                hard: { total: 16, target: 3, size: '3rem' }
+            };
+            
+            const settings = levelSettings[level];
+            
+            // إنشاء مصفوفة الحروف
+            let letters = [];
+            
+            // إضافة الحرف المطلوب
+            for (let i = 0; i < settings.target; i++) {
+                letters.push(selectedLetter);
+            }
+            
+            // إضافة حروف عشوائية
+            const allLetters = selectedLanguage === 'arabic' ? arabicLetters : englishLetters;
+            for (let i = settings.target; i < settings.total; i++) {
+                let randomLetter;
+                do {
+                    randomLetter = allLetters[Math.floor(Math.random() * allLetters.length)];
+                } while (randomLetter === selectedLetter);
+                letters.push(randomLetter);
+            }
+            
+            // خلط الحروف
+            letters = shuffleArray(letters);
+            
+            // إنشاء بطاقات الحروف
+            letters.forEach(letter => {
+                const card = document.createElement('div');
+                card.className = `letter-game-card ${level} ${selectedLanguage === 'english' ? 'english' : ''}`;
+                card.textContent = letter;
+                card.onclick = () => checkLetterSelection(card, letter);
+                gameContainer.appendChild(card);
+            });
+        }
+        
+        // المرحلة 2: كتابة الحرف
+        function loadStage2Content(container) {
+            container.innerHTML = `
+                <div class="mission">
+                    <div class="mission-text">ارسم حرف ${selectedLetter} في المساحة التالية</div>
+                    <div class="mission-subtext">استخدم الفأرة أو إصبعك للرسم - حاول تقليد الشكل الظاهر</div>
+                </div>
+                <div class="drawing-area">
+                    <canvas id="drawingCanvas"></canvas>
+                    <div class="drawing-guide ${selectedLanguage === 'english' ? 'english' : ''}">${selectedLetter}</div>
+                </div>
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-secondary" onclick="clearDrawing()">
+                        <i class="fas fa-eraser"></i> مسح الرسم
+                    </button>
+                    <button class="btn" onclick="checkDrawing()">
+                        <i class="fas fa-check"></i> التحقق من الرسم
+                    </button>
+                </div>
+            `;
+            
+            // تهيئة لوحة الرسم
+            setTimeout(initDrawingCanvas, 100);
+        }
+        
+        // المرحلة 3: اكتشاف الصور
+        function loadStage3Content(container) {
+            container.innerHTML = `
+                <div class="mission">
+                    <div class="mission-text">اكتشف الصور التي تبدأ بحرف ${selectedLetter}</div>
+                    <div class="mission-subtext">انقر على الصور الصحيحة - حاول إيجاد جميع الصور</div>
+                </div>
+                <div id="imagesContainer" class="images-game-grid"></div>
+            `;
+            
+            // إنشاء الصور
+            createImagesGame();
+        }
+        
+        // إنشاء لعبة الصور
+        function createImagesGame() {
+            const container = document.getElementById('imagesContainer');
+            container.innerHTML = '';
+            
+            // الحصول على الصور الصحيحة
+            const correctImages = selectedLanguage === 'arabic' ? 
+                (arabicImages[selectedLetter] || [{ emoji: '❓', name: 'صورة' }]) : 
+                (englishImages[selectedLetter] || [{ emoji: '❓', name: 'Image' }]);
+            
+            // إنشاء قائمة الصور (3 صحيحة + 3 خاطئة)
+            let images = [];
+            
+            // إضافة الصور الصحيحة
+            correctImages.forEach(img => {
+                images.push({ ...img, correct: true });
+            });
+            
+            // إضافة صور خاطئة (من حروف أخرى)
+            const allImages = selectedLanguage === 'arabic' ? arabicImages : englishImages;
+            const otherLetters = selectedLanguage === 'arabic' ? 
+                arabicLetters.filter(l => l !== selectedLetter) : 
+                englishLetters.filter(l => l !== selectedLetter);
+            
+            // اختيار حرفين عشوائيين آخرين
+            const randomLetters = [];
+            while (randomLetters.length < 2 && otherLetters.length > 0) {
+                const randomIndex = Math.floor(Math.random() * otherLetters.length);
+                randomLetters.push(otherLetters[randomIndex]);
+                otherLetters.splice(randomIndex, 1);
+            }
+            
+            // إضافة صور من الحروف الأخرى
+            randomLetters.forEach(letter => {
+                const letterImages = allImages[letter];
+                if (letterImages && letterImages.length > 0) {
+                    const randomImg = letterImages[Math.floor(Math.random() * letterImages.length)];
+                    images.push({ ...randomImg, correct: false, letter: letter });
+                }
+            });
+            
+            // إذا لم يكن لدينا 6 صور، نضيف صور إضافية
+            while (images.length < 6) {
+                images.push({
+                    emoji: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯'][Math.floor(Math.random() * 10)],
+                    name: selectedLanguage === 'arabic' ? 'صورة' : 'Image',
+                    correct: false
+                });
+            }
+            
+            // خلط الصور
+            images = shuffleArray(images);
+            
+            // إنشاء بطاقات الصور
+            images.forEach((img, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                card.innerHTML = `
+                    <div class="image-emoji">${img.emoji}</div>
+                    <div class="image-name">${img.name}</div>
+                    <div class="image-letter ${selectedLanguage === 'english' ? 'english' : ''}">${img.letter || selectedLetter}</div>
+                `;
+                card.dataset.correct = img.correct;
+                card.dataset.index = index;
+                card.onclick = () => checkImageSelection(card);
+                container.appendChild(card);
+            });
+        }
+        
+        // المرحلة 4: صوت الحرف
+        function loadStage4Content(container) {
+            container.innerHTML = `
+                <div class="mission">
+                    <div class="mission-text">استمع لصوت حرف ${selectedLetter} ثم اختر الحرف الصحيح</div>
+                    <div class="mission-subtext">يمكنك الضغط على زر الاستماع عدة مرات كما تريد</div>
+                </div>
+                <div class="sound-controls">
+                    <button class="sound-btn" id="playSoundBtn" onclick="playLetterSound()">
+                        <i class="fas fa-volume-up"></i> استمع لصوت الحرف ${selectedLetter}
+                    </button>
+                    <div id="soundOptionsContainer" class="sound-options"></div>
+                </div>
+            `;
+            
+            // إنشاء خيارات الصوت
+            createSoundOptions();
+        }
+        
+        // المرحلة 5: المراجعة الشاملة
+        function loadStage5Content(container) {
+            container.innerHTML = `
+                <div class="mission">
+                    <div class="mission-text">اختبار شامل لكل ما تعلمته عن حرف ${selectedLetter}</div>
+                    <div class="mission-subtext">أجب عن جميع الأسئلة لإنهاء المرحلة</div>
+                </div>
+                <div id="reviewContainer" class="review-container"></div>
+            `;
+            
+            // إنشاء أسئلة المراجعة
+            createReviewQuestions();
+        }
+        
+        // ============ دوال التحقق ============
+        
+        // التحقق من اختيار الحرف (المرحلة 1)
+        function checkLetterSelection(card, letter) {
+            if (!gameActive) return;
+            
+            const isCorrect = letter === selectedLetter;
+            
+            if (isCorrect) {
+                card.classList.add('correct');
+                addScore(currentLevel === 'easy' ? 40 : currentLevel === 'medium' ? 50 : 60);
+                showFeedback("أحسنت! لقد وجدت الحرف!", "🎉");
+                
+                // التحقق إذا تم العثور على جميع الحروف الصحيحة
+                setTimeout(() => {
+                    const correctCards = document.querySelectorAll('.letter-game-card.correct');
+                    const targetCount = currentLevel === 'easy' ? 3 : currentLevel === 'medium' ? 3 : 3;
+                    if (correctCards.length === targetCount) {
+                        completeStage();
+                    }
+                }, 1000);
+            } else {
+                card.classList.add('wrong');
+                addScore(currentLevel === 'easy' ? -5 : currentLevel === 'medium' ? -10 : -15);
+                showFeedback("خطأ! هذا ليس الحرف المطلوب", "❌");
+                
+                setTimeout(() => {
+                    card.classList.remove('wrong');
+                }, 1000);
+            }
+        }
+        
+        // التحقق من اختيار الصورة (المرحلة 3)
+        function checkImageSelection(card) {
+            if (!gameActive) return;
+            
+            const isCorrect = card.dataset.correct === 'true';
+            
+            if (isCorrect) {
+                card.classList.add('correct');
+                addScore(45);
+                showFeedback("أحسنت! هذه الصورة تبدأ بالحرف المطلوب", "🖼️");
+                
+                // التحقق إذا تم اختيار جميع الصور الصحيحة
+                setTimeout(() => {
+                    const correctCards = document.querySelectorAll('.image-card.correct');
+                    const totalCorrect = document.querySelectorAll('.image-card[data-correct="true"]').length;
+                    if (correctCards.length === totalCorrect) {
+                        completeStage();
+                    }
+                }, 1000);
+            } else {
+                card.classList.add('wrong');
+                addScore(-12);
+                showFeedback("خطأ! هذه الصورة لا تبدأ بالحرف المطلوب", "❌");
+                
+                setTimeout(() => {
+                    card.classList.remove('wrong');
+                }, 1000);
+            }
+        }
+        
+        // التحقق من اختيار الصوت (المرحلة 4)
+        function checkSoundSelection(card, letter) {
+            if (!gameActive) return;
+            
+            const isCorrect = letter === selectedLetter;
+            
+            if (isCorrect) {
+                card.classList.add('correct');
+                addScore(55);
+                showFeedback("أحسنت! لقد اخترت الحرف الصحيح", "👂");
+                
+                setTimeout(() => {
+                    completeStage();
+                }, 1000);
+            } else {
+                card.classList.add('wrong');
+                addScore(-18);
+                showFeedback("خطأ! هذا ليس صوت الحرف المطلوب", "❌");
+                
+                setTimeout(() => {
+                    card.classList.remove('wrong');
+                }, 1000);
+            }
+        }
+        
+        // ============ دوال المساعدة ============
+        
+        // إضافة نقاط
+        function addScore(points) {
+            score += points;
+            if (score < 0) score = 0;
+            document.getElementById('scoreDisplay').textContent = score;
+        }
+        
+        // عرض التغذية الراجعة
+        function showFeedback(text, icon) {
+            document.getElementById('feedbackText').textContent = text;
+            document.getElementById('rewardIcon').textContent = icon;
+            document.getElementById('rewardIcon').classList.add('celebrate');
+            
+            setTimeout(() => {
+                document.getElementById('rewardIcon').classList.remove('celebrate');
+            }, 1500);
+        }
+        
+        // تقديم مساعدة
+        function provideHint() {
+            if (currentStage === 1) {
+                showFeedback(`الحرف المطلوب هو: ${selectedLetter} - انقر عليه عندما تجده`, "💡");
+            } else if (currentStage === 3) {
+                showFeedback(`ابحث عن الصور التي تبدأ بحرف ${selectedLetter}`, "💡");
+            } else if (currentStage === 4) {
+                showFeedback(`استمع جيداً للصوت ثم اختر حرف ${selectedLetter}`, "💡");
+            } else {
+                showFeedback(`فكر جيداً قبل الإجابة`, "💡");
+            }
+        }
+        
+        // إعادة المرحلة الحالية
+        function restartStage() {
+            startStage();
+        }
+        
+        // المرحلة التالية
+        function nextStage() {
+            if (currentStage < 5) {
+                currentStage++;
+                startStage();
+            } else {
+                // أكمل جميع المراحل
+                showFeedback(`🎉 تهانينا! أكملت جميع مراحل حرف ${selectedLetter}! 🎉`, "🏆");
+                document.getElementById('nextStageBtn').style.display = 'none';
+                document.getElementById('feedbackText').classList.add('pulse');
+                gameActive = false;
+            }
+        }
+        
+        // إكمال المرحلة
+        function completeStage() {
+            gameActive = false;
+            showFeedback(`🎊 أكملت المرحلة ${currentStage} بنجاح! 🎊`, "🌟");
+            document.getElementById('nextStageBtn').style.display = 'inline-block';
+        }
+        
+        // ============ دوال الرسم (المرحلة 2) ============
+        
+        // تهيئة لوحة الرسم
+        function initDrawingCanvas() {
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // ضبط حجم اللوحة
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            // خلفية بيضاء
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            
+            // بدء الرسم
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.strokeStyle = '#ff8fab';
+                ctx.lineWidth = 12;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            });
+            
+            // أثناء الرسم
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            });
+            
+            // إنهاء الرسم
+            canvas.addEventListener('mouseup', () => {
+                isDrawing = false;
+                ctx.closePath();
+            });
+            
+            canvas.addEventListener('mouseout', () => {
+                isDrawing = false;
+            });
+            
+            // لدعم الشاشات التي تعمل باللمس
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDrawing = true;
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                [lastX, lastY] = [touch.clientX - rect.left, touch.clientY - rect.top];
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.strokeStyle = '#ff8fab';
+                ctx.lineWidth = 12;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.stroke();
+                [lastX, lastY] = [touch.clientX - rect.left, touch.clientY - rect.top];
+            });
+            
+            canvas.addEventListener('touchend', () => {
+                isDrawing = false;
+                ctx.closePath();
+            });
+        }
+        
+        // مسح الرسم
+        function clearDrawing() {
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            showFeedback("تم مسح الرسم - يمكنك البدء من جديد", "🧹");
+        }
+        
+        // التحقق من الرسم
+        function checkDrawing() {
+            addScore(85);
+            showFeedback("ممتاز! لقد رسمت الحرف بشكل رائع", "🎨");
+            
+            setTimeout(() => {
+                completeStage();
+            }, 1500);
+        }
+        
+        // ============ دوال الصوت (المرحلة 4) ============
+        
+        // إنشاء خيارات الصوت
+        function createSoundOptions() {
+            const container = document.getElementById('soundOptionsContainer');
+            container.innerHTML = '';
+            
+            // قائمة الحروف (الحرف الصحيح + حرفين خاطئين)
+            const allLetters = selectedLanguage === 'arabic' ? arabicLetters : englishLetters;
+            const otherLetters = allLetters.filter(l => l !== selectedLetter);
+            
+            let letters = [selectedLetter];
+            for (let i = 0; i < 2; i++) {
+                const randomIndex = Math.floor(Math.random() * otherLetters.length);
+                letters.push(otherLetters[randomIndex]);
+                otherLetters.splice(randomIndex, 1);
+            }
+            
+            // خلط الحروف
+            letters = shuffleArray(letters);
+            
+            // إنشاء بطاقات الصوت
+            letters.forEach(letter => {
+                const card = document.createElement('div');
+                card.className = `sound-card ${selectedLanguage === 'english' ? 'english' : ''}`;
+                card.textContent = letter;
+                card.dataset.letter = letter;
+                card.onclick = () => checkSoundSelection(card, letter);
+                container.appendChild(card);
+            });
+        }
+        
+        // تشغيل صوت الحرف (المرحلة 4)
+        function playLetterSound() {
+            const soundBtn = document.getElementById('playSoundBtn');
+            
+            // تأثير مرئي عند الضغط
+            soundBtn.classList.add('bounce');
+            setTimeout(() => soundBtn.classList.remove('bounce'), 1000);
+            
+            // عرض اسم الصوت
+            const soundName = selectedLanguage === 'arabic' ? 
+                arabicLetterSounds[selectedLetter] : 
+                englishLetterSounds[selectedLetter];
+            
+            showFeedback(`صوت حرف ${selectedLetter} هو: ${soundName}`, "🔊");
+            
+            // في المتصفحات الحديثة، يمكننا استخدام Web Speech API
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance();
+                
+                if (selectedLanguage === 'arabic') {
+                    utterance.text = soundName;
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1.2;
+                } else {
+                    utterance.text = selectedLetter;
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.7;
+                }
+                
+                // البحث عن صوت نسائي إذا متوفر
+                const voices = speechSynthesis.getVoices();
+                const femaleVoice = voices.find(voice => 
+                    (selectedLanguage === 'arabic' && voice.lang.startsWith('ar') && voice.name.includes('Female')) ||
+                    (selectedLanguage === 'english' && voice.lang.startsWith('en') && (voice.name.includes('Female') || voice.name.includes('Zira') || voice.name.includes('Samantha')))
+                );
+                
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+                
+                speechSynthesis.speak(utterance);
+            }
+        }
+        
+        // ============ دوال المراجعة (المرحلة 5) ============
+        
+        // إنشاء أسئلة المراجعة
+        function createReviewQuestions() {
+            const container = document.getElementById('reviewContainer');
+            container.innerHTML = '';
+            
+            // إنشاء 4 أسئلة متنوعة
+            const questions = [
+                {
+                    type: 'letter',
+                    question: `أي من هذه الحروف هو حرف ${selectedLetter}؟`,
+                    options: generateLetterOptions(selectedLetter, 4),
+                    correctIndex: 0
+                },
+                {
+                    type: 'image',
+                    question: `أي من هذه الصور تبدأ بحرف ${selectedLetter}؟`,
+                    options: generateImageOptions(selectedLetter, 4),
+                    correctIndex: 0
+                },
+                {
+                    type: 'sound',
+                    question: `إذا سمعت صوت "${selectedLanguage === 'arabic' ? arabicLetterSounds[selectedLetter] : englishLetterSounds[selectedLetter]}" فأي حرف هذا؟`,
+                    options: generateLetterOptions(selectedLetter, 4),
+                    correctIndex: 0
+                },
+                {
+                    type: 'writing',
+                    question: `كيف يكتب حرف ${selectedLetter}؟`,
+                    options: generateWritingOptions(selectedLetter, 4),
+                    correctIndex: 0
+                }
+            ];
+            
+            // إنشاء الأسئلة
+            questions.forEach((q, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'review-card';
+                
+                let optionsHtml = '';
+                q.options.forEach((option, optIndex) => {
+                    let displayText = option;
+                    if (q.type === 'image') {
+                        displayText = `${option.emoji} ${option.name}`;
+                    }
+                    
+                    optionsHtml += `
+                        <div class="review-option" data-index="${optIndex}">
+                            ${displayText}
+                        </div>
+                    `;
+                });
+                
+                questionCard.innerHTML = `
+                    <div class="review-question">${q.question}</div>
+                    <div class="review-options">${optionsHtml}</div>
+                `;
+                
+                container.appendChild(questionCard);
+                
+                // إضافة مستمعات الأحداث
+                setTimeout(() => {
+                    const options = questionCard.querySelectorAll('.review-option');
+                    options.forEach((option, optIndex) => {
+                        option.addEventListener('click', () => checkReviewAnswer(index, optIndex, q.correctIndex, questionCard));
+                    });
+                }, 100);
+            });
+        }
+        
+        // توليد خيارات الحروف
+        function generateLetterOptions(correctLetter, count) {
+            const allLetters = selectedLanguage === 'arabic' ? arabicLetters : englishLetters;
+            const otherLetters = allLetters.filter(l => l !== correctLetter);
+            
+            let options = [correctLetter];
+            for (let i = 1; i < count; i++) {
+                const randomIndex = Math.floor(Math.random() * otherLetters.length);
+                options.push(otherLetters[randomIndex]);
+                otherLetters.splice(randomIndex, 1);
+            }
+            
+            return shuffleArray(options);
+        }
+        
+        // توليد خيارات الصور
+        function generateImageOptions(correctLetter, count) {
+            const images = selectedLanguage === 'arabic' ? arabicImages : englishImages;
+            const correctImage = images[correctLetter] ? images[correctLetter][0] : { emoji: '❓', name: 'صورة' };
+            
+            let options = [correctImage];
+            
+            // الحصول على صور من حروف أخرى
+            const otherLetters = selectedLanguage === 'arabic' ? 
+                arabicLetters.filter(l => l !== correctLetter) : 
+                englishLetters.filter(l => l !== correctLetter);
+            
+            for (let i = 1; i < count; i++) {
+                const randomLetter = otherLetters[Math.floor(Math.random() * otherLetters.length)];
+                const randomImage = images[randomLetter] ? images[randomLetter][0] : { emoji: '❓', name: 'صورة' };
+                options.push(randomImage);
+                
+                // إزالة الحرف المستخدم
+                const letterIndex = otherLetters.indexOf(randomLetter);
+                if (letterIndex > -1) otherLetters.splice(letterIndex, 1);
+            }
+            
+            return shuffleArray(options);
+        }
+        
+        // توليد خيارات الكتابة
+        function generateWritingOptions(correctLetter, count) {
+            const allLetters = selectedLanguage === 'arabic' ? arabicLetters : englishLetters;
+            const similarLetters = allLetters.filter(l => l !== correctLetter);
+            
+            let options = [correctLetter];
+            for (let i = 1; i < count; i++) {
+                const randomIndex = Math.floor(Math.random() * similarLetters.length);
+                options.push(similarLetters[randomIndex]);
+                similarLetters.splice(randomIndex, 1);
+            }
+            
+            return shuffleArray(options);
+        }
+        
+        // التحقق من إجابة المراجعة
+        function checkReviewAnswer(questionIndex, selectedIndex, correctIndex, questionCard) {
+            if (!gameActive) return;
+            
+            const options = questionCard.querySelectorAll('.review-option');
+            
+            // إزالة التحديد من جميع الخيارات
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'wrong');
+            });
+            
+            // تحديد الخيار المختار
+            options[selectedIndex].classList.add('selected');
+            
+            // التحقق من الإجابة
+            if (selectedIndex === correctIndex) {
+                options[selectedIndex].classList.add('correct');
+                addScore(20);
+                
+                // التحقق إذا أجاب على جميع الأسئلة
+                setTimeout(() => {
+                    const selectedOptions = document.querySelectorAll('.review-option.selected');
+                    if (selectedOptions.length === 4) {
+                        completeStage();
+                    }
+                }, 500);
+            } else {
+                options[selectedIndex].classList.add('wrong');
+                options[correctIndex].classList.add('correct');
+                addScore(-8);
+            }
+        }
+        
+        // ============ دوال مساعدة عامة ============
+        
+        // خلط المصفوفة
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+        
+        // تهيئة اللعبة عند تحميل الصفحة
+        window.addEventListener('load', () => {
+            showScreen('languageScreen');
+            
+            // تهيئة Web Speech API عند توفرها
+            if ('speechSynthesis' in window) {
+                // تحميل الأصوات المتاحة
+                speechSynthesis.getVoices();
+                
+                // بعض المتصفحات تحتاج إلى هذا الحدث
+                speechSynthesis.onvoiceschanged = () => {
+                    // الأصوات أصبحت جاهزة
+                };
+            }
+        });
+    </script>
+</body>
+</html>
